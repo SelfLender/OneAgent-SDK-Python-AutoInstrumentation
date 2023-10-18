@@ -18,6 +18,10 @@ def instrument():
             super(DynatraceCursor, self).__init__(wrapped)
             self._self_dynatrace_db_info = dynatrace_db_info
 
+        # The `with` context is directly forwarded by the ObjectProxy and we need to intercept it
+        def __enter__(self):
+            return self
+
         def execute(self, query, vars=None):
             if hasattr(self, "_self_dynatrace_db_info") and self._self_dynatrace_db_info is not None:
                 with sdk.trace_sql_database_request(self._self_dynatrace_db_info, "{}".format(query)) as tracer:
